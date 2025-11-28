@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Website</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* Floating background circles */
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.09);
+      animation: float 10s infinite ease-in-out;
+    }
+
+    .circle:nth-child(1) { width: 120px; height: 120px; top: 10%; left: 15%; animation-duration: 9s; }
+    .circle:nth-child(2) { width: 80px; height: 80px; top: 70%; left: 75%; animation-duration: 12s; }
+    .circle:nth-child(3) { width: 150px; height: 150px; top: 50%; left: 5%; animation-duration: 14s; }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-25px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transform: scale(0.95);
+      animation: pop 0.8s ease forwards;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      animation: slideDown 1s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      transform: scale(1.03);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #06b6d4;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0891b2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .weather-box {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 20px;
+      border-radius: 15px;
+      display: none;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .weather-box img {
+      width: 100px;
+      animation: floatIcon 3s infinite ease-in-out;
+    }
+
+    @keyframes floatIcon {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    .temp {
+      font-size: 40px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .details {
+      margin-top: 15px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Weather Website</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name..." />
+    <button onclick="getWeather()">Get Weather</button>
+
+    <div class="weather-box" id="weatherBox">
+      <img id="icon" />
+      <div class="temp" id="temp"></div>
+      <div class="details" id="details"></div>
+    </div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value;
+      const api = `http://api.weatherapi.com/v1/current.json?key=0770131a89994a42bd9151604252311&q=${city}&aqi=yes`;
+
+      try {
+        const response = await fetch(api);
+        const data = await response.json();
+
+        document.getElementById("icon").src = data.current.condition.icon;
+        document.getElementById("temp").innerHTML = `${data.current.temp_c}°C`;
+        document.getElementById("details").innerHTML = `
+          <strong>${data.location.name}, ${data.location.country}</strong><br>
+          Condition: ${data.current.condition.text}<br>
+          Humidity: ${data.current.humidity}%<br>
+          Wind: ${data.current.wind_kph} kph
+        `;
+
+        document.getElementById("weatherBox").style.display = "block";
+      } catch (error) {
+        alert("City not found! Please try again.");
+      }
+    }
+  </script>
+</body>
+</html>
