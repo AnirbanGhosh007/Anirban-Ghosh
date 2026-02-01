@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changable Login Page</title>
+    <style>
+        /* Base Variables (These will be updated by JS) */
+        :root {
+            --primary-red: #ff0000; /* Primary Accent */
+            --dark-red: #4b0000;
+            --neon-glow: 0 0 15px var(--primary-red);
+            --glass: rgba(20, 0, 0, 0.8);
+            --text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        #background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.pinimg.com/736x/59/10/27/591027151122091687.jpg') no-repeat center center;
+            background-size: cover;
+            filter: brightness(0.4);
+            z-index: -1;
+            transition: background-image 0.8s ease-in-out, transform 0.1s ease-out;
+        }
+
+        .login-box {
+            position: relative;
+            width: 400px;
+            padding: 40px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+            text-align: center;
+            color: var(--text-color);
+            transition: all 0.5s ease;
+        }
+
+        .login-box:hover {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 20px var(--primary-red);
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--primary-red);
+            text-shadow: 0 0 10px var(--primary-red);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .input-group label {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+            transition: 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: -12px;
+            color: var(--primary-red);
+            font-size: 0.7rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 2px solid var(--primary-red);
+            color: var(--text-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.4s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--primary-red);
+            color: #000;
+        }
+
+        .footer span {
+            color: var(--primary-red);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="background"></div>
+
+    <div class="login-box">
+        <h2> BG Adaptive Login</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" required>
+                <label>User ID</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" required>
+                <label>Password</label>
+            </div>
+            <button type="submit" class="btn">Submit</button>
+        </form>
+
+        <div class="footer">
+            <p>Click <span onclick="document.getElementById('bgInput').click()">here</span> to change background</p>
+            <input type="file" id="bgInput" style="display:none" accept="image/*">
+        </div>
+    </div>
+
+    <script>
+        const bg = document.getElementById('background');
+        const bgInput = document.getElementById('bgInput');
+        const root = document.documentElement;
+
+        // Function to extract average color from image
+        function updateThemeFromImage(imgUrl) {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = imgUrl;
+
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1;
+                canvas.height = 1;
+                
+                // Draw image into 1x1 pixel to get average color
+                ctx.drawImage(img, 0, 0, 1, 1);
+                const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+                
+                // Set CSS variables based on extracted color
+                const color = `rgb(${r}, ${g}, ${b})`;
+                const darkColor = `rgb(${Math.max(0, r-100)}, ${Math.max(0, g-100)}, ${Math.max(0, b-100)})`;
+                const glassColor = `rgba(${r}, ${g}, ${b}, 0.6)`;
+                
+                root.style.setProperty('--primary-red', color);
+                root.style.setProperty('--dark-red', darkColor);
+                root.style.setProperty('--glass', glassColor);
+                
+                // Change text color to black if the background is too bright
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                root.style.setProperty('--text-color', brightness > 150 ? '#000' : '#fff');
+            };
+        }
+
+        // Handle File Upload
+        bgInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newUrl = e.target.result;
+                    bg.style.backgroundImage = `url(${newUrl})`;
+                    updateThemeFromImage(newUrl);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form Submit
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Welcome, " + document.getElementById('username').value + "!");
+        });
+    </script>
+</body>
+</html>
